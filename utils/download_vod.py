@@ -23,8 +23,9 @@ def is_downloadable(response: requests.Response) -> bool:
     param url: Path to the file to check
     return: bool
     '''
+    status = response.status_code
     ct = response.headers.get('Content-Type')
-    if ct == 'video/MP2T':
+    if status == 200 and (ct == 'video/MP2T' or ct == 'binary/octet-stream'):
         return True
     return False
 
@@ -33,10 +34,12 @@ def download_transport_stream(path: str, url: str) -> bool:
     Downloads a .ts file and saves it in a directory
     return: True if success, False if failure
     '''
+    # headers = {"User-Agent": "Mozilla/5.0"}
     if check_file(path):
         r = requests.get(url)
         if is_downloadable(r):
             with open(path, 'wb') as download:
                 download.write(r.content)
         else:
-            print(f'{path} could not be downloaded')
+            if r.status_code != 403:
+                print(f'{url} could not be downloaded\nstatus code: {r.status_code}\n{r.headers}')
