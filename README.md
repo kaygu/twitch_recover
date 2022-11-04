@@ -1,5 +1,11 @@
 # TWITCH VOD RECOVERY
 
+## Requirements
+
+```cmd
+ffmpeg
+```
+
 ## Installation
 
 ```cmd

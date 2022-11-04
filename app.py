@@ -21,7 +21,7 @@ if __name__ == '__main__':
     
     # Download muted segments first if aviable, else download in order
     for record in m3u8.splitlines():
-        if '#' not in record:
+        if not record.startswith('#') and record != '':
             if '-unmuted.ts' in record:
                 record_name = record.replace('-unmuted.ts', '.ts')
                 record_muted = record.replace('-unmuted.ts', '-muted.ts')
