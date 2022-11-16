@@ -1,5 +1,7 @@
 # App generated files
 vod_*/
+*.ts 
+*.mp4
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

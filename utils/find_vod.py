@@ -5,7 +5,7 @@ import requests
 import time
 
 
-headers = {"User-Agent": "Mozilla/5.0"}
+headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 OPR/91.0.4516.106"}
 
 def load_domains():
     with open('domains.txt', 'r') as f:
@@ -28,7 +28,7 @@ def find_vod_path(url: str) -> str:
         print(f'Stream recorded on {result.group(1)}')
         timestamp = calendar.timegm(time.strptime(result.group(1), '%Y-%m-%d %H:%M:%S'))
     else:
-        raise Exception('TwitchTracker status code returned', req.status_code)
+        raise Exception('TwitchTracker status code returned', req.status_code, req.headers)
     
     base_path = f"{name}_{vodID}_{timestamp}"
     h = hashlib.sha1(base_path.encode())

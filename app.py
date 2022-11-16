@@ -4,8 +4,9 @@ from utils.find_vod import find_vod_path, find_vod_host
 from utils.m3u8 import has_muted, count_muted_segments
 from utils.download_vod import create_dir, download_transport_stream
 
+TT = "https://twitchtracker.com/shroud/streams/41466366795"
+
 if __name__ == '__main__':
-    TT = "https://twitchtracker.com/targamas1/streams/46112643356"
     vod_path = find_vod_path(TT)
     vod_url = find_vod_host(vod_path)
     print(vod_url)
