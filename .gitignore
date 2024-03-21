@@ -1,6 +1,7 @@
 # App generated files
 vod_*/
 *.ts 
+*.m3u8
 *.mp4
 
 # Byte-compiled / optimized / DLL files
