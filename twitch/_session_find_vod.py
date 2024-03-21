@@ -1,11 +1,24 @@
-import calendar
+##
+## Obsolete module, replaced by twitch/find_vod.py
+##
+
 import hashlib
 import re
 import requests
 import time
 
 
-headers = {"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 OPR/91.0.4516.106"}
+headers = {
+  "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 OPR/91.0.4516.106",
+  "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,/;q=0.8,application/signed-exchange;v=b3;q=0.9", 
+  "accept-encoding" : "gzip, deflate, br", 
+  "accept-language" : "en-GB,en;q=0.9,en-US;q=0.8,de;q=0.7", 
+  "cache-control"   : "no-cache", 
+  "pragma" : "no-cache", 
+  "upgrade-insecure-requests" : "1" 
+}
+
+req = requests.Session()
 
 def load_domains():
     with open('domains.txt', 'r') as f:
@@ -22,13 +35,16 @@ def find_vod_path(url: str) -> str:
     name = result.group(1)
     print(f'Searching for VOD of streamer {name}')
     vodID = result.group(2)
-    req = requests.get(url, headers=headers)
-    if req.status_code == 200:
-        result = re.search(r' stream on (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', req.text)
+    resp = req.get(url, headers=headers)
+    print(url)
+    if resp.status_code == 200:
+        print(resp.headers)
+        print(resp.text) #debug
+        result = re.search(r' stream on (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', resp.text)
         print(f'Stream recorded on {result.group(1)}')
         timestamp = calendar.timegm(time.strptime(result.group(1), '%Y-%m-%d %H:%M:%S'))
     else:
-        raise Exception('TwitchTracker status code returned', req.status_code, req.headers)
+        raise Exception('TwitchTracker status code returned', resp.status_code)
     
     base_path = f"{name}_{vodID}_{timestamp}"
     h = hashlib.sha1(base_path.encode())
@@ -42,7 +58,7 @@ def find_vod_host(path: str) -> str:
     domains = load_domains()
     for host in domains:
         url = host + path
-        r = requests.get(url)
+        r = req.get(url)
         if r.status_code == 200:
             break
     return url

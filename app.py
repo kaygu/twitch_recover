@@ -1,33 +1,17 @@
-import requests
+from twitch.find_vod import generate_vod_path, generate_vod_path_offline, find_vod_host
+from utils.download import download_vod
+from utils.ffmpeg_converter import convert_video
 
-from utils.find_vod import find_vod_path, find_vod_host
-from utils.m3u8 import has_muted, count_muted_segments
-from utils.download_vod import create_dir, download_transport_stream
 
-TT = "https://twitchtracker.com/shroud/streams/41466366795"
+TT = "https://twitchtracker.com/aleczandxr/streams/50506622717"
+PATH = "video"
 
 if __name__ == '__main__':
-    vod_path = find_vod_path(TT)
+    vod_path = generate_vod_path_offline(TT, '2024-02-28 15:07:23', "480p30")
     vod_url = find_vod_host(vod_path)
     print(vod_url)
-    r = requests.get(vod_url)
-    base_url = vod_url.rpartition('/')[0]
-    m3u8 = r.text
-    vod_name = "vod_" + TT.rsplit('/')[-3] + "_" + TT.rsplit('/')[-1] # streamer name + vod ID
-    create_dir(vod_name)
-    if has_muted(m3u8):
-        print(f'VOD has {count_muted_segments(m3u8)} muted segments')
-    else:
-        print('VOD has no muted content')
-    
-    # Download muted segments first if aviable, else download in order
-    for record in m3u8.splitlines():
-        if not record.startswith('#') and record != '':
-            if '-unmuted.ts' in record:
-                record_name = record.replace('-unmuted.ts', '.ts')
-                record_muted = record.replace('-unmuted.ts', '-muted.ts')
-                print(f'Downloading muted record {record_name}')
-                download_transport_stream(vod_name + '/' + record_name, base_url + '/' + record_name) #download original file (recover)
-                download_transport_stream(vod_name + '/' + record_name, base_url + '/' + record_muted) #download muted file (backup)
-            else:
-                download_transport_stream(vod_name + '/' + record, base_url + '/' + record)
+    if not vod_url:
+        print("No VOD was found. Quitting")
+        exit()
+    download_vod(vod_url, PATH)
+    convert_video(PATH, "output.mp4")
