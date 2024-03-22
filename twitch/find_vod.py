@@ -21,7 +21,7 @@ def generate_vod_path(twitch_tracker_url: str, quality: str = "chunked") -> str:
     '''
     result = re.search(r'https://twitchtracker.com/(\w+)/streams/(\d+)', twitch_tracker_url)
     if not result:
-        raise Exception('Not a valid TwitchTracker vod link')
+        raise Exception('Not a valid TwitchTracker video link')
     name = result.group(1)
     print(f'Searching for VOD of streamer {name}')
     vodID = result.group(2)
@@ -30,6 +30,8 @@ def generate_vod_path(twitch_tracker_url: str, quality: str = "chunked") -> str:
         result = re.search(r' stream on (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', req.text)
         print(f'Stream recorded on {result.group(1)}')
         timestamp = calendar.timegm(time.strptime(result.group(1), '%Y-%m-%d %H:%M:%S'))
+    elif req.status_code == 404:
+        raise Exception('404 TwitchTracker video not found')
     else:
         raise Exception('TwitchTracker status code returned', req.status_code, req.headers)
     
@@ -49,14 +51,14 @@ def generate_vod_path_offline(twitch_tracker_url: str, date: str, quality: str =
     '''
     result = re.search(r'https://twitchtracker.com/(\w+)/streams/(\d+)', twitch_tracker_url)
     if not result:
-        raise Exception('Not a valid TwitchTracker vod link')
+        raise Exception('Not a valid TwitchTracker video link')
     steamer_name = result.group(1)
     print(f'Searching for VOD of streamer {steamer_name}')
     vodID = result.group(2)
     try:
         timestamp = calendar.timegm(time.strptime(date, '%Y-%m-%d %H:%M:%S'))
     except:
-        print("timestamp conversion failed")
+        raise Exception('Invalid date format')
     
     base_path = f"{steamer_name}_{vodID}_{timestamp}"
     h = hashlib.sha1(base_path.encode())
