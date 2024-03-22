@@ -1,4 +1,14 @@
 import os
+import shutil
+
+def clean_files(vid_dir: str, m3u8_file: str):
+    '''
+    Clean the mess after the video conversion
+    '''
+    if os.path.exists(m3u8_file):
+        os.remove(m3u8_file)
+    if os.path.exists(vid_dir):
+        shutil.rmtree(vid_dir)
 
 def create_dir(name: str):
     '''
