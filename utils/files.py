@@ -1,14 +1,19 @@
 import os
+import time
 import shutil
 
-def clean_files(vid_dir: str, m3u8_file: str):
+def clean_files(vid_dir: str, m3u8_file: str, verbose: bool = False):
     '''
     Clean the mess after the video conversion
     '''
+    start_time = time.time()  # Start timing
     if os.path.exists(m3u8_file):
         os.remove(m3u8_file)
     if os.path.exists(vid_dir):
         shutil.rmtree(vid_dir)
+    end_time = time.time()  # End timing
+    if verbose:
+        print(f"Cleaning files time taken: {end_time - start_time:.2f} seconds") 
 
 def create_dir(name: str):
     '''
