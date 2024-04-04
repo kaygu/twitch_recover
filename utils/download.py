@@ -2,7 +2,7 @@ import requests
 
 from utils.files import create_dir, check_file
 
-def download_vod(m3u8_url: str, path: str):
+def download_vod(m3u8_url: str, path: str, verbose: bool = False):
     '''
     Downloads a VOD from a m3u8 file
     param m3u7_url: URL to the m3u8 file
@@ -24,7 +24,8 @@ def download_vod(m3u8_url: str, path: str):
                   #if failed, download muted file (backup)
                   download_ts_file(vod_name + '/' + record_name, base_url + '/' + record_muted) 
               else:
-                  print(f"Muted segment {record_name} was recovered")
+                  if verbose:
+                      print(f"Muted segment {record_name} was recovered")
           else:
               download_ts_file(vod_name + '/' + record, base_url + '/' + record)
 

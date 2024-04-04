@@ -25,7 +25,7 @@ parser.add_argument(
     '--timestamp',
     '-t',
     required=False,
-    help='Optional. The timestamp of the stream in the format YYYY-MM-DD HH:MM:SS'
+    help='Optional. The timestamp of the stream in the format YYYY-MM-DD HH:MM:SS. Required to get the VOD without requesting TwitchTracker directly'
 )
 parser.add_argument(
     '--quality',
@@ -58,7 +58,7 @@ if __name__ == '__main__':
         vod_path = generate_vod_path_offline(args.url, args.timestamp, args.quality)
     else:
         vod_path = generate_vod_path(args.url, args.quality)
-    vod_url = find_vod_host(vod_path)
+    vod_url = find_vod_host(vod_path, args.verbose)
     print(vod_url)
     if not vod_url:
         print("No VOD was found. Quitting")
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     start_time = time.time()  # Start timing
 
     if args.recover:
-        download_vod(vod_url, TEMP_FOLDER_PATH)
+        download_vod(vod_url, TEMP_FOLDER_PATH, args.verbose)
         convert_video(TEMP_FOLDER_PATH, args.output)
     else:
         rewrite_m3u8(vod_url, TEMP_M3U8_FILE)
@@ -77,12 +77,8 @@ if __name__ == '__main__':
     clean_files(TEMP_FOLDER_PATH, TEMP_M3U8_FILE)
 
     end_time = time.time()  # End timing
-    print(f"Time taken: {end_time - start_time} seconds") 
+    if args.verbose:
+        print(f"Time taken: {end_time - start_time} seconds") 
 
-    #Todo: Add a function to delete the .ts files after conversion
-    #Todo: Add command line arguments for the script
-    #Todo: Time the download and conversion process
     #Todo: Update progression (precents, time left, etc.) for the download process
-
-    # Time for ffmpeg stream converion: 2045 seconds
-    # Time for download and conversion: 3075 seconds
+    #Todo: Clean files after keybord interrupt

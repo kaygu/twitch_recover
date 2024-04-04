@@ -12,7 +12,7 @@ def load_domains():
         DOMAINS = f.read().splitlines()
     return DOMAINS
 
-def generate_vod_path(twitch_tracker_url: str, quality: str = "chunked") -> str:
+def generate_vod_path(twitch_tracker_url: str, quality: str = "chunked", verbose: bool = False) -> str:
     '''
     Generate VOD for a TwitchTracker url
     param twitch_tracker_url: URL to the TwitchTracker VOD
@@ -23,12 +23,16 @@ def generate_vod_path(twitch_tracker_url: str, quality: str = "chunked") -> str:
     if not result:
         raise Exception('Not a valid TwitchTracker video link')
     name = result.group(1)
-    print(f'Searching for VOD of streamer {name}')
+    if verbose:
+        print(f'Searching for VOD of streamer {name}')
     vodID = result.group(2)
     req = requests.get(twitch_tracker_url, headers=headers)
     if req.status_code == 200:
         result = re.search(r' stream on (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', req.text)
-        print(f'Stream recorded on {result.group(1)}')
+        if not result:
+            raise Exception('Could not find timestamp in TwitchTracker page')
+        if verbose:
+            print(f'Stream recorded on {result.group(1)}')
         timestamp = calendar.timegm(time.strptime(result.group(1), '%Y-%m-%d %H:%M:%S'))
     elif req.status_code == 404:
         raise Exception('404 TwitchTracker video not found')
@@ -41,7 +45,7 @@ def generate_vod_path(twitch_tracker_url: str, quality: str = "chunked") -> str:
     PATH = f"/{hash}_{base_path}/{quality}/index-dvr.m3u8"
     return PATH
 
-def generate_vod_path_offline(twitch_tracker_url: str, date: str, quality: str = "chunked") -> str:
+def generate_vod_path_offline(twitch_tracker_url: str, date: str, quality: str = "chunked", verbose: bool = False) -> str:
     '''
     Generate VOD for a TwitchTracker url (offline version)
     param twitch_tracker_url: URL to the TwitchTracker VOD
@@ -53,7 +57,9 @@ def generate_vod_path_offline(twitch_tracker_url: str, date: str, quality: str =
     if not result:
         raise Exception('Not a valid TwitchTracker video link')
     steamer_name = result.group(1)
-    print(f'Searching for VOD of streamer {steamer_name}')
+
+    if verbose:
+        print(f'Searching for VOD of streamer {steamer_name}')
     vodID = result.group(2)
     try:
         timestamp = calendar.timegm(time.strptime(date, '%Y-%m-%d %H:%M:%S'))
@@ -66,7 +72,7 @@ def generate_vod_path_offline(twitch_tracker_url: str, date: str, quality: str =
     PATH = f"/{hash}_{base_path}/{quality}/index-dvr.m3u8"
     return PATH
 
-def find_vod_host(path: str) -> str:
+def find_vod_host(path: str, verbose: bool = False) -> str:
     '''
     Find the matching hostname for the VOD path
     param path: Path to the VOD
@@ -77,8 +83,10 @@ def find_vod_host(path: str) -> str:
         url = host + path
         r = requests.get(url)
         if r.status_code == 403:
-            print("Denied: " + url)
+            if verbose:
+                print("Denied: " + url)
         if r.status_code == 200:
-            print("Success: " + url)
+            if verbose:
+                print("Success: " + url)
             return url
     return None
