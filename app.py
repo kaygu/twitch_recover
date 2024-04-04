@@ -8,12 +8,10 @@ from utils.ffmpeg_converter import convert_video
 from utils.files import clean_files
 
 
-
-
 # Create the parser
 parser = argparse.ArgumentParser(
     description='Process Twitch VODs.',
-    epilog='Example: python app.py --url https://twitchtracker.com/summit1g/streams/312313546 --quality chunked'
+    epilog='Example: python app.py https://twitchtracker.com/shroud/streams/41466366795 --quality chunked --verbose'
 )
 
 # Add the arguments
@@ -53,7 +51,8 @@ args = parser.parse_args()
 TEMP_FOLDER_PATH = "video" # Warning: Do not name the directory with an existing name or it will be overwritten
 TEMP_M3U8_FILE = "temp.m3u8"
 
-if __name__ == '__main__':
+def main():
+    start_time = time.time()  # Start timing
     if args.timestamp:
         vod_path = generate_vod_path_offline(args.url, args.timestamp, args.quality)
     else:
@@ -63,8 +62,6 @@ if __name__ == '__main__':
     if not vod_url:
         print("No VOD was found. Quitting")
         exit()
-          
-    start_time = time.time()  # Start timing
 
     if args.recover:
         download_vod(vod_url, TEMP_FOLDER_PATH, args.verbose)
@@ -73,12 +70,20 @@ if __name__ == '__main__':
         rewrite_m3u8(vod_url, TEMP_M3U8_FILE)
         convert_stream_m3u8(TEMP_M3U8_FILE, args.output)
     
-     # Clean up files after converting the video
-    clean_files(TEMP_FOLDER_PATH, TEMP_M3U8_FILE)
 
     end_time = time.time()  # End timing
     if args.verbose:
-        print(f"Time taken: {end_time - start_time} seconds") 
+        print(f"Total time taken: {end_time - start_time:.2f} seconds") 
 
-    #Todo: Update progression (precents, time left, etc.) for the download process
-    #Todo: Clean files after keybord interrupt
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nInterrupted by user")
+        # Let program run to clean files
+    
+    # Clean up files after converting the video
+    clean_files(TEMP_FOLDER_PATH, TEMP_M3U8_FILE, args.verbose)
+
+
+    #Todo: Update progression (percents, time left, etc.) for the download process
