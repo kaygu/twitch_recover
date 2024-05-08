@@ -13,7 +13,7 @@ def clean_files(vid_dir: str, m3u8_file: str, verbose: bool = False):
         shutil.rmtree(vid_dir)
     end_time = time.time()  # End timing
     if verbose:
-        print(f"Cleaning files time taken: {end_time - start_time:.2f} seconds") 
+        print(f"Cleaning files time taken: {end_time - start_time:.4f} seconds") 
 
 def create_dir(name: str):
     '''

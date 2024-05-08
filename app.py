@@ -86,4 +86,8 @@ if __name__ == '__main__':
     clean_files(TEMP_FOLDER_PATH, TEMP_M3U8_FILE, args.verbose)
 
 
-    #Todo: Update progression (percents, time left, etc.) for the download process
+    #TODO: Update progression (percents, time left, etc.) for the download process
+    #TODO: Record stats (most used server etc)
+    #TODO: Handle 404
+    #TODO: Get default VOD name from stream title
+    #TODO: Record livestream
