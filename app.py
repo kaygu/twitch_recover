@@ -1,5 +1,11 @@
 import time
 import argparse
+from dotenv import load_dotenv
+from pathlib import Path
+
+from src.connectors.base import BaseConnector
+from src.connectors.twitchtracker import TwitchTrackerConnector
+from src.connectors.twitch import TwitchConnector
 
 from twitch.find_vod import generate_vod_path, generate_vod_path_offline, find_vod_host
 from utils.ffmpeg_stream import convert_stream_m3u8, rewrite_m3u8
@@ -11,7 +17,7 @@ from utils.files import clean_files
 # Create the parser
 parser = argparse.ArgumentParser(
     description='Process Twitch VODs.',
-    epilog='Example: python app.py https://twitchtracker.com/shroud/streams/41466366795 --quality chunked --verbose'
+    epilog='Example: python app.py https://twitchtracker.com/shroud/streams/41466366795 --quality 720p60 --verbose'
 )
 
 # Add the arguments
@@ -40,6 +46,12 @@ parser.add_argument(
     help='Optional. The output file name. Default is output.mp4'
 )
 parser.add_argument(
+    '--env',
+    '-e',
+    default='.env',
+    help='Optional. The path to the .env file. Default is .env'
+)
+parser.add_argument(
     "--recover",
     action="store_true",
     help="Use this flag to try to recover the stream or the sound of the video.\n This might not work if the video has been deleted for more than a few hours\nThis flag makes the process slower and takes more space on the dick (during runtime)")
@@ -53,10 +65,19 @@ TEMP_M3U8_FILE = "temp.m3u8"
 
 def main():
     start_time = time.time()  # Start timing
-    if args.timestamp:
-        vod_path = generate_vod_path_offline(args.url, args.timestamp, args.quality)
-    else:
-        vod_path = generate_vod_path(args.url, args.quality)
+    env_path = Path(args.env)
+    load_dotenv(dotenv_path=env_path) # loads environment variables from .env file
+
+    # TODO: Change connector if link is ttracker or twitch 
+    connector = TwitchConnector()
+    # if args.timestamp:
+    #     vod_path = generate_vod_path_offline(args.url, args.timestamp, args.quality)
+    # else:
+    #     vod_path = generate_vod_path(args.url, args.quality)
+
+
+    ## Change connector depending on the URL provided
+    vod_path = connector.get_vod_path(args.url, args.quality, args.verbose)
     vod_url = find_vod_host(vod_path, args.verbose)
     print(vod_url)
     if not vod_url:
@@ -90,4 +111,6 @@ if __name__ == '__main__':
     #TODO: Record stats (most used server etc)
     #TODO: Handle 404
     #TODO: Get default VOD name from stream title
+    #TODO: Check that VOD name is available before downloading to avoid output override
     #TODO: Record livestream
+    #TODO: Create interface for different vod links (twitchtracker, twitch.com, ...)
