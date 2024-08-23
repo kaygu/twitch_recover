@@ -1,0 +1,16 @@
+altgraph==0.17.4
+beautifulsoup4==4.12.3
+certifi==2024.7.4
+charset-normalizer==3.3.2
+fbs==1.2.2
+idna==3.7
+macholib==1.16.3
+pefile==2023.2.7
+PyInstaller==3.4
+PyQt6==6.7.0
+PyQt6-Qt6==6.7.2
+PyQt6_sip==13.8.0
+pywin32-ctypes==0.2.2
+requests==2.32.3
+soupsieve==2.5
+urllib3==2.2.2
