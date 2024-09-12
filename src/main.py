@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QCheckBox, QComboBox, QD
         QVBoxLayout, QWidget)
 
 from connectors.sullygnome import SullygnomeConnector
+from utils.format import str_to_datetime
 
 
 class MainWindow(QMainWindow):
@@ -35,13 +36,16 @@ class MainWindow(QMainWindow):
 
     def onUsernameButtonPressed(self, usernames:str):
         # Do research for the twitch usernames
-        connector = SullygnomeConnector()
-        # TODO: If twitchTracker fails, try other services (like sullygname)
-        print(f"Button Pressed, searching for")
-        for n in usernames.split(';'):
-            print(n)
-            connector.get_past_vods(n, True)
+        connector = SullygnomeConnector() # TODO: Develop other connectors in case the current service fails
         self.usernamesGroupBox.setDisabled(True)
+        for n in usernames.split(';'):
+            for vod in connector.get_past_vods(n, verbose=False):
+                streamID, timestamp, start_time_str, end_time_str = vod
+                start_datetime = str_to_datetime(start_time_str)
+                end_datetime = str_to_datetime(end_time_str)
+                if start_datetime > self.dateTimeStart.dateTime() and \
+                        end_datetime < self.dateTimeEnd.dateTime():
+                    print(f'{n} / {streamID} / {timestamp}')
 
     def createUsernamesGroupBox(self):
         self.usernamesGroupBox = QGroupBox("Twitch Usernames")
@@ -63,17 +67,23 @@ class MainWindow(QMainWindow):
         self.timePeriodGroupBox = QGroupBox("Timestamps")
 
         # Add label for start & end timestamps
-        dateTimeStart = QDateTimeEdit(self.timePeriodGroupBox)
-        dateTimeStart.setDateTime(QDateTime.currentDateTime())
+        self.dateTimeStart = QDateTimeEdit(self.timePeriodGroupBox)
+        self.dateTimeStart.setDateTime(QDateTime.currentDateTime().addDays(-1))
+        self.dateTimeStart.setDateTimeRange(QDateTime.currentDateTime().addMonths(-2), 
+                                       QDateTime.currentDateTime())
+        self.dateTimeStart.setCalendarPopup(True)
 
-        dateTimeEnd = QDateTimeEdit(self.timePeriodGroupBox)
-        dateTimeEnd.setDateTime(QDateTime.currentDateTime())
+        self.dateTimeEnd = QDateTimeEdit(self.timePeriodGroupBox)
+        self.dateTimeEnd.setDateTime(QDateTime.currentDateTime())
+        self.dateTimeEnd.setDateTimeRange(QDateTime.currentDateTime().addMonths(-2), 
+                                       QDateTime.currentDateTime()) # TODO: Only pick a date after start date (dynamicly update widget)
+        self.dateTimeEnd.setCalendarPopup(True)
 
-        # TODO: Add option, either enter start & end timestamp or only start & duration 
+        # TODO: ? Add option, either enter start & end timestamp or only start & duration 
 
         layout = QHBoxLayout()
-        layout.addWidget(dateTimeStart)
-        layout.addWidget(dateTimeEnd)
+        layout.addWidget(self.dateTimeStart)
+        layout.addWidget(self.dateTimeEnd)
 
         self.timePeriodGroupBox.setLayout(layout)
 
