@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import List
+from typing import List, Iterable
 
 class BaseConnector(ABC):
     '''
@@ -8,5 +8,5 @@ class BaseConnector(ABC):
     def get_vod_path(self, url: str, quality: str, verbose: bool = False) -> str:
         pass
     
-    def get_past_vods(self, streamer: str, verbose: bool = False) -> List[tuple]:
+    def get_past_vods(self, streamer: str, verbose: bool = False) -> Iterable[tuple]:
         pass
