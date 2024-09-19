@@ -42,9 +42,9 @@ class M3U8:
                         match = re.search(r'#EXTINF:(\d+\.\d+)', previous_line)
                         seconds_passed += float(match.group(1))
                         if start_in_x_seconds <= seconds_passed and seconds_passed <= end_in_x_seconds:
-                            print(f'download segment {line}')
+                            # print(f'{line}')
+                            pass
                     previous_line = line
-
 
         # Create temp dir & temp txt file
         # Download all the .ts files
@@ -57,17 +57,16 @@ class M3U8:
         '''
         seconds_after_start = 0
         seconds_before_end = 0
-        # start = start.toPyDateTime().replace(tzinfo=datetime.timezone.utc)
-        # end = end.toPyDateTime().replace(tzinfo=datetime.timezone.utc)
         if start > self.timestamp:
-            # How many seconds after the start of te vod
+            # How many seconds after the start of the vod
             seconds_after_start = (start - self.timestamp).total_seconds()
         if end < (self.timestamp + datetime.timedelta(seconds=self.get_length())):
             # How many seconds before the end of the vod
-            seconds_before_end = (end - (self.timestamp + datetime.timedelta(seconds=self.get_length()))).total_seconds()
+            seconds_before_end = (end - self.timestamp).total_seconds()
             
-        print(f'seconds to skip at start {seconds_after_start}')
-        print(f'seconds to skip at end {seconds_before_end}')
+        if self.verbose:
+            print(f'seconds to skip at start {seconds_after_start}')
+            print(f'seconds to skip at end {seconds_before_end}')
         return seconds_after_start, seconds_before_end
 
     def _download_ts_file(self, url: str, path: str) -> bool:
