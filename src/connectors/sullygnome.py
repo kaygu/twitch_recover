@@ -1,10 +1,6 @@
-
-import calendar
-import hashlib
 import re
 from typing import List, Iterable
 import requests
-import time
 
 from connectors.base import BaseConnector
 from utils.enums import HTTPStatusCode
@@ -19,7 +15,7 @@ class SullygnomeConnector(BaseConnector):
     def get_past_vods(self, streamer: str, verbose: bool = False) -> Iterable[tuple]:
         req = requests.get(self.SULLYGNOME_STREAMS_URL.format(STREAMER_NAME=streamer), headers=header)
         if req.status_code == HTTPStatusCode.OK:
-            result = re.search('var PageInfo = {.+\"id\":(\d+)', req.text)
+            result = re.search(r'var PageInfo = {.+\"id\":(\d+)', req.text)
             if not result or result.group(1) == '0':
                 raise Exception(f'Could not find Sullygnome ID for {streamer}')
             if verbose:
