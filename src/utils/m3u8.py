@@ -56,7 +56,7 @@ class M3U8:
         Checks if some part of the vod are out fo the timeframe
         '''
         seconds_after_start = 0
-        seconds_before_end = 0
+        seconds_before_end = self.get_length()
         if start > self.timestamp:
             # How many seconds after the start of the vod
             seconds_after_start = (start - self.timestamp).total_seconds()
@@ -89,7 +89,7 @@ class M3U8:
         '''
         Check if a portion of the vod is muted
         '''
-        if '-unmuted.ts' in self.conent:
+        if '-unmuted.ts' in self.content:
             if self.verbose:
                 print(f'VOD has muted segments')
             return True
