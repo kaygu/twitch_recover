@@ -14,7 +14,7 @@ def qdatetime_to_utc_datetime(qdt):
 
     return dt
 
-def convert_to_utc_timestamp(date_str: str) -> int:
+def str_to_utc_timestamp(date_str: str) -> int:
     dt = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
     dt = dt.replace(tzinfo=timezone.utc)
     

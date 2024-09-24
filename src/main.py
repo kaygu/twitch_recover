@@ -5,12 +5,11 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QCheckBox, QComboBox, QD
         QSlider, QSpinBox, QStyleFactory, QTableWidget, QTabWidget, QTextEdit,
         QVBoxLayout, QWidget)
 
-import datetime
 
-from timelines import TimelinesWindow
+from timeline import TimelineWindow
 from connectors.sullygnome import SullygnomeConnector
 from connectors.twitch import TwitchConnector
-from utils.format import str_to_datetime, convert_to_utc_timestamp, qdatetime_to_utc_datetime
+from utils.format import str_to_datetime, str_to_utc_timestamp, qdatetime_to_utc_datetime
 from utils.m3u8 import M3U8
 
 
@@ -37,6 +36,14 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Twitch Bulk Download")
         self.setMinimumSize(320, 250)
 
+    def closeEvent(self, event):
+        '''
+        Close Event
+        '''
+        if self.w:
+            self.w.close()
+        super().closeEvent()
+    
     def onUsernameButtonPressed(self, usernames:str):
         # Do research for the twitch usernames
         connector = SullygnomeConnector() # TODO: Develop other connectors in case the current service fails
@@ -54,11 +61,12 @@ class MainWindow(QMainWindow):
                 if (start_datetime < user_end_dt and \
                         end_datetime > user_start_dt):
                     print(f'{n} / {streamID} / {timestamp_str}')
-                    timestamp = convert_to_utc_timestamp(timestamp_str)
+                    timestamp = str_to_utc_timestamp(timestamp_str)
                     m3u8_url = twitchConnector.get_vod(n, streamID, timestamp)
-                    data['streams'].append({'name': n, 'stream_id': streamID, 'timestamp': timestamp_str, 'm3u8': m3u8_url})
+                    m3u8 = M3U8(m3u8_url, verbose=False)
+                    data['streams'].append({'name': n, 'stream_id': streamID, 'timestamp': timestamp_str, 'm3u8': m3u8})
         
-        self.w = TimelinesWindow(verbose=True)
+        self.w = TimelineWindow(verbose=True)
         self.w.setStreamData(data)
         self.w.show()
 
