@@ -10,11 +10,13 @@ from typing import List
 
 from utils.format import str_to_utc_timestamp
 
+MAGIC_UNIT_DIVIDER = 3600
+
 class TimelineItem(QGraphicsRectItem):
     def __init__(self, data: dict, normalized_start: int, row: int, parent=None):
         super().__init__(parent)
 
-        self.unit_divider = 3600
+        self.unit_divider = MAGIC_UNIT_DIVIDER
 
         # data
         self.id = data.get('stream_id')
@@ -47,7 +49,7 @@ class TimelineScene(QGraphicsScene):
         self.start = start
         self.end = end
         self.length = end - start
-        self.unit_divider = 3600 # every hour (TODO: change to minutes of scale permits it)
+        self.unit_divider = MAGIC_UNIT_DIVIDER # every hour (TODO: change to minutes of scale permits it)
         self.unit_width = 850 / (self.length // self.unit_divider)
         self.num_units = self.length // self.unit_divider 
 
