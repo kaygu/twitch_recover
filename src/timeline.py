@@ -10,7 +10,13 @@ from typing import List
 
 from utils.format import str_to_utc_timestamp
 
-MAGIC_UNIT_DIVIDER = 3600
+MAGIC_UNIT_DIVIDER = 3600 # 1 unit is one hour (TODO: adapt scale to length of time frame and zoom level)
+MAGIC_UNIT_WIDTH = 10 # px
+MAGIC_MARGIN_UNITS = 4 # number of units of margin around the timeline
+
+# TODO : Lots of things
+#   - Display items out of timeframe in b&w
+
 
 class TimelineItem(QGraphicsRectItem):
     def __init__(self, data: dict, normalized_start: int, row: int, parent=None):
@@ -24,13 +30,13 @@ class TimelineItem(QGraphicsRectItem):
         self.normalized_start = normalized_start / self.unit_divider
         self.row = row
         self.duration = data.get('length') / self.unit_divider
-        self.unit_width = 11.8 # ??
+        self.unit_width = MAGIC_UNIT_WIDTH
         print(f'start stream at {self.normalized_start} for {self.duration} seconds on row {self.row}')
         # rect dimentsions
         self.height = 50
 
         # Set the size of the item based on duration
-        self.setRect(QRectF(self.normalized_start * self.unit_width, self.row * self.height, self.duration * self.unit_width, self.height))
+        self.setRect(QRectF((self.normalized_start + MAGIC_MARGIN_UNITS) * self.unit_width, self.row * self.height, self.duration * self.unit_width, self.height))
 
         # Set the color of the item
         self.setBrush(QBrush(QColor(100, 200, 250)))
@@ -40,17 +46,17 @@ class TimelineItem(QGraphicsRectItem):
         self.text = QGraphicsTextItem(str(self.id), self)
         self.text.setDefaultTextColor(Qt.GlobalColor.black)
         self.text.setFont(QFont("Arial", 10))
-        self.text.setPos(self.normalized_start * self.unit_width + 10, self.row * self.height + 15)
+        self.text.setPos((self.normalized_start + MAGIC_MARGIN_UNITS) * self.unit_width + 10, self.row * self.height + 15)
 
 class TimelineScene(QGraphicsScene):
-    def __init__(self, streams: List[TimelineItem], start: int, end: int, parent=None):
+    def __init__(self, streams: List[TimelineItem], start: datetime.datetime, end: datetime.datetime, parent=None):
         super().__init__(parent)
         self.streams = streams
         self.start = start
         self.end = end
         self.length = end - start
-        self.unit_divider = MAGIC_UNIT_DIVIDER # every hour (TODO: change to minutes of scale permits it)
-        self.unit_width = 850 / (self.length // self.unit_divider)
+        self.unit_divider = MAGIC_UNIT_DIVIDER 
+        self.unit_width = MAGIC_UNIT_WIDTH # 850 / (self.length // self.unit_divider)
         self.num_units = self.length // self.unit_divider 
 
 
@@ -64,8 +70,8 @@ class TimelineScene(QGraphicsScene):
         Draw horizontal lines to represent the timeline axis
         '''
         print(f'n° units {self.num_units} of scale {self.unit_width} px')
-        for i in range(self.num_units):
-            x_pos = i * self.unit_width
+        for i in range(self.num_units + MAGIC_MARGIN_UNITS):
+            x_pos = (i + MAGIC_MARGIN_UNITS) * self.unit_width
             # Draw vertical grid line
             line = QGraphicsLineItem(x_pos, 0, x_pos, 500)
             line.setPen(QPen(Qt.GlobalColor.black))
@@ -91,9 +97,9 @@ class TimelineWindow(QMainWindow):
 
         # Handle data
         self.data = data
-        self.tl_start = int(self.data.get('start').timestamp())
-        self.tl_end = int(self.data.get('end').timestamp())
-        self.streams = [TimelineItem(strm, str_to_utc_timestamp(strm.get('timestamp')) - self.tl_start, i) 
+        self.tl_start = self.data.get('start')
+        self.tl_end = self.data.get('end')
+        self.streams = [TimelineItem(strm, str_to_utc_timestamp(strm.get('timestamp')) - int(self.tl_start.timestamp()), i) 
                         for i, strm in enumerate(self.data.get('streams'))]
         
         ##
