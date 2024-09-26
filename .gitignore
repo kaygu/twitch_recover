@@ -1,3 +1,5 @@
+src/old/*
+
 # App generated files
 vod_*/
 *.ts 
